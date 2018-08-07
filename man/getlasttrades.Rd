@@ -6,7 +6,7 @@
 \usage{
 getlasttrades(instrument, count = NULL, startTimestamp = NULL,
   endTimestamp = NULL, startId = NULL, endId = NULL, startSeq = NULL,
-  endSeq = NULL)
+  endSeq = NULL, simplify = TRUE)
 }
 \arguments{
 \item{instrument}{string [optional], instrument name, example "BTC-28SEP18-3500-P" (or other items in rderibit::getinstruments()). Can as well be "all", "options", "futures", "BTC-THISWEEK", "BTC-NEXTWEEK"}

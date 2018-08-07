@@ -4,7 +4,7 @@
 \alias{request}
 \title{Helper function to send requests to the API. If private methods are used, provide corresponding API keys}
 \usage{
-request(keys = NULL, action, data = NULL)
+request(keys = NULL, action, data = NULL, simplify = TRUE)
 }
 \arguments{
 \item{keys}{list containing access and  secret keys in the form: keys <- list(key = ACCESS_KEY, secret = ACCESS_SECRET)}

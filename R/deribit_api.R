@@ -8,8 +8,11 @@
 #' @param data additional data(options) provided as list of vectors (of length one, typically)
 #' use httr::with_verbose(rderibit::request(action = "/api/v1/private/cancel", keys = keys, data = list(orderId = "6306623820") ) ) to troubleshoot the connection to API
 
-request <- function(keys = NULL, action, data = NULL) {
+request <- function(keys = NULL, action, data = NULL, simplify = TRUE) {
 
+  # to set logger to DEBUG:
+  # futile.logger::flog.threshold(futile.logger::DEBUG, name = "rderibit")
+  futile.logger::flog.debug(keys, name = "rderibit")
   # response = None
   if (startsWith(action, "/api/v1/private/")) {
       assertthat::assert_that(!is.null(keys$key), !is.null(keys$secret), msg = "Key or secret empty" )
@@ -20,7 +23,8 @@ request <- function(keys = NULL, action, data = NULL) {
                            query = data)
  } else  response <- httr::GET( url = paste0("https://www.deribit.com/", action), query = data )
 
- return(httr::content(response))
+ if (simplify) {jsonlite::fromJSON(httr::content(response, "text", encoding = "UTF-8"), simplifyDataFrame = TRUE)
+  } else  return(httr::content(response))
 
   # TODO Add error handling for responses as in this Python example
   # if response.status_code != 200:
@@ -83,15 +87,16 @@ generate_signature <- function(keys, action, data, nonceoverride = F) {
 #### PUBLIC API ####
 
 #' @export
-getorderbook <- function(instrument) { return(request(action = "/api/v1/public/getorderbook", data = list(instrument = instrument)))
+getorderbook <- function(instrument, simplify = TRUE) {
+  return(request(action = "/api/v1/public/getorderbook", data = list(instrument = instrument), simplify = simplify))
 }
 
 #' @export
-getinstruments <- function() { return(request(action = "/api/v1/public/getinstruments"))
+getinstruments <- function(simplify = TRUE) { return(request(action = "/api/v1/public/getinstruments", simplify = simplify))
   }
 
 #' @export
-getcurrencies <- function() { return(request(action = "/api/v1/public/getcurrencies"))
+getcurrencies <- function(simplify = TRUE) { return(request(action = "/api/v1/public/getcurrencies", simplify = simplify))
   }
 
 #' @export
@@ -119,7 +124,8 @@ stats <- function() { return(request(action = "/api/v1/public/stats"))
 #'
 #' @export
 #'
-getlasttrades <- function(instrument, count = NULL, startTimestamp = NULL, endTimestamp = NULL, startId = NULL, endId = NULL, startSeq = NULL, endSeq = NULL) {
+getlasttrades <- function(instrument, count = NULL, startTimestamp = NULL, endTimestamp = NULL, startId = NULL,
+                          endId = NULL, startSeq = NULL, endSeq = NULL, simplify = TRUE) {
   options <- list(instrument = instrument)
 
   if (!is.null(count))
@@ -144,7 +150,7 @@ getlasttrades <- function(instrument, count = NULL, startTimestamp = NULL, endTi
     options[['endSeq']] <- endSeq
 
 
-  return(request(action = "/api/v1/public/getlasttrades", data = options))
+  return(request(action = "/api/v1/public/getlasttrades", data = options, simplify = simplify))
 }
 
 
@@ -235,8 +241,42 @@ edit <- function(keys, orderId, quantity, price) {
 
 
 
+#' @export
+
+getopenorders <- function(keys, instrument = NULL, orderId = NULL, simplify = TRUE) {
+
+  options <- list()
+  if (!is.null(instrument))  options[["instrument"]] <- instrument
+  if (!is.null(orderId))  options[["orderId"]] <- orderId
+
+  return(request(action = "/api/v1/private/getopenorders", keys = keys, data = options, simplify = simplify))
+}
 
 
+#' @export
+positions <- function(keys) { return (request(action = "/api/v1/private/positions", keys = keys) ) }
+
+#' @export
+orderhistory <- function(keys, count = NULL, simplify = TRUE) {
+
+  options <- list()
+  if (!is.null(count))  options[["count"]] <- count
+
+  return(request(action = "/api/v1/private/orderhistory", keys = keys, data = options, simplify = simplify))
+}
+
+
+#' @export
+
+tradehistory <- function(keys, instrument = "all", count = NULL, startTradeId = NULL, simplify = TRUE) {
+
+  options <- list(instrument = instrument)
+
+  if (!is.null(count))  options[["count"]] <- count
+  if (!is.null(startTradeId))  options[["startTradeId"]] <- startTradeId
+
+  return(request(action = "/api/v1/private/tradehistory", keys = keys, data = options, simplify = simplify))
+}
 
 
 
