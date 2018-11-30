@@ -2,7 +2,7 @@
 % Please edit documentation in R/deribit_api.R
 \name{sell}
 \alias{sell}
-\title{Places a sell order in an instrument (authorization is required).}
+\title{Places sell order for an instrument (authorization is required).}
 \usage{
 sell(keys, instrument, quantity, price, postOnly = FALSE, label = NULL)
 }
@@ -10,7 +10,7 @@ sell(keys, instrument, quantity, price, postOnly = FALSE, label = NULL)
 \item{keys}{list containing access and  secret keys in the form: keys <- list(key = ACCESS_KEY, secret = ACCESS_SECRET)}
 }
 \description{
-Places a sell order in an instrument (authorization is required).
+Places sell order for an instrument (authorization is required).
 }
 \examples{
 rderibit::sell(keys, "BTC-28DEC18-8750-P", postOnly = T, quantity = 0.1, price = .005)

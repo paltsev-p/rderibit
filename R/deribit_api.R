@@ -76,7 +76,7 @@ generate_signature <- function(keys, action, data, nonceoverride = F) {
   futile.logger::flog.debug(string, name = "rderibit")
 
   # digest::digest() didnt' work, using openssl::sha256() instead
-  apiSignature <- paste0(apiKey, ".", nonce, ".", RCurl::base64(openssl::sha256(charToRaw(string))))
+  apiSignature <- paste0(keys$key, ".", nonce, ".", RCurl::base64(openssl::sha256(charToRaw(string))))
 
   futile.logger::flog.debug(apiSignature, name = "rderibit")
 
@@ -156,6 +156,9 @@ getlasttrades <- function(instrument, count = NULL, startTimestamp = NULL, endTi
 
 #### PRIVATE API ####
 
+#' Get user account summary (authorization is required).
+#' @param keys list containing access and  secret keys in the form: keys <- list(key = ACCESS_KEY, secret = ACCESS_SECRET)
+#' @examples rderibit::account(keys)
 #' @export
 account <- function(keys) { return (request(action = "/api/v1/private/account", keys = keys) ) }
 
@@ -181,7 +184,7 @@ buy <- function(keys, instrument, quantity, price, postOnly = FALSE, label= NULL
 
 
 
-#' Places a sell order in an instrument (authorization is required).
+#' Places sell order for an instrument (authorization is required).
 #' @param keys list containing access and  secret keys in the form: keys <- list(key = ACCESS_KEY, secret = ACCESS_SECRET)
 #' @examples rderibit::sell(keys, "BTC-28DEC18-8750-P", postOnly = T, quantity = 0.1, price = .005)
 #' @export
@@ -205,6 +208,7 @@ cancel <- function(keys, orderId){ return(request(keys = keys, action = "/api/v1
 }
 
 #' Bulk cancel orders based on type or instrument
+#' @param keys list containing access and  secret keys in the form: keys <- list(key = ACCESS_KEY, secret = ACCESS_SECRET)
 #' @param typeDef Cancel instructions. Can be "all", "options", "futures" or NULL. Will be ignored if instrument is not NULL
 #' @param instrument  string [optional], instrument name, example "BTC-28SEP18-3500-P" (or other items in rderibit::getinstruments()).
 #' @examples cancelall(keys, "BTC-28DEC18-8750-P")
@@ -226,7 +230,11 @@ cancelall <- function(keys, instrument = NULL, typeDef= NULL) {
 }
 
 
-
+#' Change order parameters
+#' @param keys list containing access and  secret keys in the form: keys <- list(key = ACCESS_KEY, secret = ACCESS_SECRET)
+#' @param orderId ID of the order to be changed
+#' @param quantity New quantity
+#' @param price New price
 #' @export
 
 edit <- function(keys, orderId, quantity, price) {
@@ -240,7 +248,11 @@ edit <- function(keys, orderId, quantity, price) {
 }
 
 
-
+#' Lists open orders
+#' @param keys list containing access and  secret keys in the form: keys <- list(key = ACCESS_KEY, secret = ACCESS_SECRET)
+#' @param instrument (optional) Instrument name
+#' @param orderId (optional)
+#' @param simplify Boolean, defaults to TRUE
 #' @export
 
 getopenorders <- function(keys, instrument = NULL, orderId = NULL, simplify = TRUE) {
@@ -253,10 +265,18 @@ getopenorders <- function(keys, instrument = NULL, orderId = NULL, simplify = TR
 }
 
 
+#' Lists open positions
+#' @param keys list containing access and  secret keys in the form: keys <- list(key = ACCESS_KEY, secret = ACCESS_SECRET)
 #' @export
 positions <- function(keys) { return (request(action = "/api/v1/private/positions", keys = keys) ) }
 
+
+#' Outputs order history
+#' @param keys list containing access and  secret keys in the form: keys <- list(key = ACCESS_KEY, secret = ACCESS_SECRET)
+#' @param count (optional) Length of the output
+#' @param simplify bool, simplifies output to dataframe, defaults to TRUE
 #' @export
+
 orderhistory <- function(keys, count = NULL, simplify = TRUE) {
 
   options <- list()
@@ -266,6 +286,12 @@ orderhistory <- function(keys, count = NULL, simplify = TRUE) {
 }
 
 
+#' Outputs trade history
+#' @param keys list containing access and  secret keys in the form: keys <- list(key = ACCESS_KEY, secret = ACCESS_SECRET)
+#' @param instrument (optional) Instrument name
+#' @param startTradeId (optional) startTradeId where output begins
+#' @param count (optional) Length of the output
+#' @param simplify bool, simplifies output to dataframe, defaults to TRUE
 #' @export
 
 tradehistory <- function(keys, instrument = "all", count = NULL, startTradeId = NULL, simplify = TRUE) {

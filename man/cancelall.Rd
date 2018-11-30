@@ -7,6 +7,8 @@
 cancelall(keys, instrument = NULL, typeDef = NULL)
 }
 \arguments{
+\item{keys}{list containing access and  secret keys in the form: keys <- list(key = ACCESS_KEY, secret = ACCESS_SECRET)}
+
 \item{instrument}{string [optional], instrument name, example "BTC-28SEP18-3500-P" (or other items in rderibit::getinstruments()).}
 
 \item{typeDef}{Cancel instructions. Can be "all", "options", "futures" or NULL. Will be ignored if instrument is not NULL}
